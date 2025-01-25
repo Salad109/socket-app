@@ -5,31 +5,24 @@ import java.awt.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class House {
-
-    private static final AtomicInteger sewageCounter = new AtomicInteger(0);
-
-    private JLabel sewageCounterLabel;
+public class SewagePlant {
     private JLabel portLabel;
     private JTextArea textArea;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(House::new);
+        SwingUtilities.invokeLater(SewagePlant::new);
     }
 
-    public House() {
+    public SewagePlant() {
         createAndShowGUI();
-        startSewageIncrementer();
         startServerInBackground();
     }
 
     private void createAndShowGUI() {
-        JFrame frame = new JFrame("House");
+        JFrame frame = new JFrame("Sewage Plant");
 
         // Initialize components
-        sewageCounterLabel = new JLabel(getSewageCounterText());
         portLabel = new JLabel("Port: ");
         textArea = new JTextArea(10, 30);
         textArea.setEditable(false);
@@ -39,7 +32,6 @@ public class House {
         frame.setLayout(new BorderLayout());
         frame.add(portLabel, BorderLayout.NORTH);
         frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(sewageCounterLabel, BorderLayout.SOUTH);
 
         frame.setSize(400, 300);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -47,19 +39,6 @@ public class House {
         frame.setVisible(true);
     }
 
-    private void startSewageIncrementer() {
-        new Thread(() -> {
-            while (true) {
-                try {
-                    Thread.sleep(1000);
-                    sewageCounter.incrementAndGet();
-                    SwingUtilities.invokeLater(() -> sewageCounterLabel.setText(getSewageCounterText()));
-                } catch (InterruptedException e) {
-                    logError("Sewage incrementer interrupted", e);
-                }
-            }
-        }).start();
-    }
 
     private void startServerInBackground() {
         new Thread(this::startServer).start(); // Run server logic in a background thread
@@ -70,7 +49,7 @@ public class House {
             int port = serverSocket.getLocalPort();
             SwingUtilities.invokeLater(() -> {
                 portLabel.setText("Port: " + port);
-                logMessage("House is listening on port " + port);
+                logMessage("Sewage Plant is listening on port " + port);
             });
 
             while (true) {
@@ -83,10 +62,6 @@ public class House {
         }
     }
 
-    private String getSewageCounterText() {
-        return "Sewage counter: " + sewageCounter.get();
-    }
-
     private void logMessage(String message) {
         SwingUtilities.invokeLater(() -> textArea.append(message + "\n"));
     }
@@ -96,9 +71,6 @@ public class House {
         e.printStackTrace();
     }
 
-    /**
-     * Inner class to handle client connections.
-     */
     private class ServerThread extends Thread {
         private final Socket socket;
 
@@ -130,27 +102,18 @@ public class House {
 
         private void processRequest(String request, PrintWriter writer) {
             String[] parts = request.split(" ");
-            if (parts.length == 3 && "DRAIN SEWAGE".equalsIgnoreCase(parts[0] + " " + parts[1])) {
-                handleSewageRequest(parts[2], writer);
+            if (parts.length == 3 && "DUMP SEWAGE".equalsIgnoreCase(parts[0] + " " + parts[1])) {
+                handleSewageDump(parts[2], writer);
             } else {
                 writer.println("Unknown request");
                 logMessage("Sent: Unknown request");
             }
         }
 
-        private void handleSewageRequest(String remainingCapacityStr, PrintWriter writer) {
+        private void handleSewageDump(String dumpedSewage, PrintWriter writer) {
             try {
-                int remainingCapacity = Integer.parseInt(remainingCapacityStr);
-                int amountToSend = Math.min(remainingCapacity, sewageCounter.get());
-                sewageCounter.addAndGet(-amountToSend);
-
-                String response = "DRAINED SEWAGE " + amountToSend;
+                String response = "DUMPED SEWAGE " + dumpedSewage;
                 writer.println(response);
-
-                SwingUtilities.invokeLater(() -> {
-                    sewageCounterLabel.setText(getSewageCounterText());
-                    textArea.append("Sent: " + response + "\n");
-                });
             } catch (NumberFormatException e) {
                 writer.println("Invalid request format");
                 logMessage("Sent: Invalid request format");

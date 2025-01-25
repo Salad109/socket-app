@@ -7,77 +7,138 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class Tanker {
-    private static String hostname = "localhost";
-    private static int port;
-    private static PrintWriter writer;
-    private static BufferedReader reader;
-    private static JTextArea textArea;
+
     private static final int TOTAL_CAPACITY = 20;
-    private static int currentSewageAmount = 0;
-    private static JLabel sewageLabel;
+
+    private String hostname = "localhost";
+    private int port = 12345;
+    private int currentSewageAmount = 0;
+
+    private Socket socket;
+    private PrintWriter writer;
+    private BufferedReader reader;
+
+    private JTextArea textArea;
+    private JLabel sewageLabel;
+    private JTextField hostnameField;
+    private JTextField portField;
 
     public static void main(String[] args) {
+        SwingUtilities.invokeLater(Tanker::new);
+    }
+
+    public Tanker() {
+        createAndShowGUI();
+    }
+
+    private void createAndShowGUI() {
         JFrame frame = new JFrame("Tanker");
-        JButton button = new JButton("Get Sewage");
+
+        // Input fields
+        hostnameField = new JTextField(hostname, 10);
+        portField = new JTextField(String.valueOf(port), 10);
+
+        // Sewage label
+        sewageLabel = new JLabel(getSewageLabelText());
+
+        // Text area for logs
         textArea = new JTextArea(10, 30);
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        JTextField portField = new JTextField("12345", 10);
-        JTextField hostnameField = new JTextField("localhost", 10);
-        sewageLabel = new JLabel("Current sewage amount: 0");
 
-        button.addActionListener(e -> {
-            hostname = hostnameField.getText();
-            port = Integer.parseInt(portField.getText());
-            connectToServer();
-            sendRequest();
-        });
+        // Button
+        JButton button = new JButton("Get Sewage");
+        button.addActionListener(e -> fetchSewage());
 
-        JPanel panel = new JPanel(new FlowLayout());
-        panel.add(new JLabel("Hostname:"));
-        panel.add(hostnameField);
-        panel.add(new JLabel("Port:"));
-        panel.add(portField);
-        panel.add(button);
+        // Layout
+        JPanel inputPanel = new JPanel(new FlowLayout());
+        inputPanel.add(new JLabel("Hostname:"));
+        inputPanel.add(hostnameField);
+        inputPanel.add(new JLabel("Port:"));
+        inputPanel.add(portField);
+        inputPanel.add(button);
 
         frame.setLayout(new BorderLayout());
-        frame.getContentPane().add(panel, BorderLayout.NORTH);
-        frame.getContentPane().add(scrollPane, BorderLayout.CENTER);
-        frame.getContentPane().add(sewageLabel, BorderLayout.SOUTH);
+        frame.add(inputPanel, BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(sewageLabel, BorderLayout.SOUTH);
+
         frame.setSize(600, 400);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setAlwaysOnTop(true);
         frame.setVisible(true);
     }
 
-    private static void connectToServer() {
-        Socket socket;
+    private void fetchSewage() {
+        hostname = hostnameField.getText();
         try {
-            socket = new Socket(hostname, port);
-            OutputStream output = socket.getOutputStream();
-            writer = new PrintWriter(output, true);
-            InputStream input = socket.getInputStream();
-            reader = new BufferedReader(new InputStreamReader(input));
-            SwingUtilities.invokeLater(() -> textArea.append("Connected to server on port " + port + "\n"));
-        } catch (UnknownHostException ex) {
-            SwingUtilities.invokeLater(() -> textArea.append("House not found: " + ex.getMessage() + "\n"));
-        } catch (IOException ex) {
-            SwingUtilities.invokeLater(() -> textArea.append("I/O error: " + ex.getMessage() + "\n"));
+            port = Integer.parseInt(portField.getText());
+            connectToServer();
+            sendRequest();
+        } catch (NumberFormatException ex) {
+            logMessage("Invalid port number: " + ex.getMessage());
         }
     }
 
-    private static void sendRequest() {
+    private void connectToServer() {
+        try {
+            socket = new Socket(hostname, port);
+            writer = new PrintWriter(socket.getOutputStream(), true);
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            logMessage("Connected to server on port " + port);
+        } catch (UnknownHostException ex) {
+            logMessage("Unknown host: " + ex.getMessage());
+        } catch (IOException ex) {
+            logMessage("I/O error: " + ex.getMessage());
+        }
+    }
+
+    private void sendRequest() {
+        if (socket == null || socket.isClosed()) {
+            logMessage("Error: Not connected to the server.");
+            return;
+        }
+
         try {
             int remainingCapacity = TOTAL_CAPACITY - currentSewageAmount;
-            writer.println("GET " + remainingCapacity);
-            SwingUtilities.invokeLater(() -> textArea.append("Sent: GET " + remainingCapacity + "\n"));
+            String request = "DRAIN SEWAGE " + remainingCapacity;
+
+            writer.println(request);
+            logMessage("Sent: " + request);
+
             String response = reader.readLine();
-            int receivedSewage = Integer.parseInt(response.split(" ")[1]);
-            currentSewageAmount += receivedSewage;
-            SwingUtilities.invokeLater(() -> textArea.append("Received: " + response + "\n"));
-            SwingUtilities.invokeLater(() -> sewageLabel.setText("Current sewage amount: " + currentSewageAmount));
+            processResponse(response);
         } catch (IOException ex) {
-            SwingUtilities.invokeLater(() -> textArea.append("I/O error: " + ex.getMessage() + "\n"));
+            logMessage("I/O error while sending request: " + ex.getMessage());
         }
+    }
+
+    private void processResponse(String response) {
+        if (response == null || response.isEmpty()) {
+            logMessage("No response from server.");
+            return;
+        }
+
+        logMessage("Received: " + response);
+        String[] parts = response.split(" ");
+        if (parts.length == 3 && "DRAINED SEWAGE".equalsIgnoreCase(parts[0] + " " + parts[1])) {
+            try {
+                int receivedSewage = Integer.parseInt(parts[2]);
+                currentSewageAmount += receivedSewage;
+                sewageLabel.setText(getSewageLabelText());
+            } catch (NumberFormatException ex) {
+                logMessage("Invalid sewage amount in response: " + parts[2]);
+            }
+        } else {
+            logMessage("Unexpected response: " + response);
+        }
+    }
+
+    private String getSewageLabelText() {
+        return "Current sewage amount: " + currentSewageAmount + "/" + TOTAL_CAPACITY;
+    }
+
+    private void logMessage(String message) {
+        SwingUtilities.invokeLater(() -> textArea.append(message + "\n"));
     }
 }
