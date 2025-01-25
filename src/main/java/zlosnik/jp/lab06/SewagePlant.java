@@ -9,6 +9,8 @@ import java.net.Socket;
 public class SewagePlant {
     private JLabel portLabel;
     private JTextArea textArea;
+    private JLabel sewageLabel;
+    private int accumulatedSewage = 0;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(SewagePlant::new);
@@ -27,11 +29,13 @@ public class SewagePlant {
         textArea = new JTextArea(10, 30);
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
+        sewageLabel = new JLabel("Accumulated sewage: 0");
 
         // Layout
         frame.setLayout(new BorderLayout());
         frame.add(portLabel, BorderLayout.NORTH);
         frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(sewageLabel, BorderLayout.SOUTH);
 
         frame.setSize(400, 300);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -114,6 +118,9 @@ public class SewagePlant {
             try {
                 String response = "DUMPED SEWAGE " + dumpedSewage;
                 writer.println(response);
+                logMessage("Sent: " + response);
+                accumulatedSewage += Integer.parseInt(dumpedSewage);
+                sewageLabel.setText("Accumulated sewage: " + accumulatedSewage);
             } catch (NumberFormatException e) {
                 writer.println("Invalid request format");
                 logMessage("Sent: Invalid request format");
