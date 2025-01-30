@@ -41,27 +41,22 @@ public class Tanker {
     private void createAndShowGUI() {
         JFrame frame = new JFrame("Tanker");
 
-        // Input fields
         houseHostnameField = new JTextField(houseHostname, 10);
         housePortField = new JTextField(String.valueOf(housePort), 10);
         sewagePlantHostnameField = new JTextField(sewagePlantHostname, 10);
         sewagePlantPortField = new JTextField(String.valueOf(sewagePlantPort), 10);
 
-        // Sewage label
         sewageLabel = new JLabel(getSewageLabelText());
 
-        // Text area for logs
         textArea = new JTextArea(10, 30);
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
 
-        // Button
         JButton sewageGetButton = new JButton("Get Sewage");
         sewageGetButton.addActionListener(e -> fetchSewage());
         JButton sewageDumpButton = new JButton("Dump Sewage");
         sewageDumpButton.addActionListener(e -> dumpSewage());
 
-        // Layout
         JPanel inputPanel = new JPanel(new GridLayout(0, 2));
         inputPanel.add(new JLabel("House hostname:"));
         inputPanel.add(houseHostnameField);

@@ -4,35 +4,31 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.PrintWriter;
 
-public class SewagePlant {
+public class Office {
     private JLabel portLabel;
     private JTextArea textArea;
-    private JLabel sewageLabel;
-    private int accumulatedSewage = 0;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(SewagePlant::new);
+        SwingUtilities.invokeLater(Office::new);
     }
 
-    public SewagePlant() {
+    public Office() {
         createAndShowGUI();
         Server server = new Server(textArea, portLabel, this::processRequest);
         server.startServerInBackground();
     }
 
     private void createAndShowGUI() {
-        JFrame frame = new JFrame("Sewage Plant");
+        JFrame frame = new JFrame("Office");
 
         portLabel = new JLabel("Port: ");
         textArea = new JTextArea(10, 30);
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
-        sewageLabel = new JLabel("Accumulated sewage: 0");
 
         frame.setLayout(new BorderLayout());
         frame.add(portLabel, BorderLayout.NORTH);
         frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(sewageLabel, BorderLayout.SOUTH);
 
         frame.setSize(400, 300);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -51,24 +47,14 @@ public class SewagePlant {
 
     private void processRequest(String request, PrintWriter writer) {
         String[] parts = request.split(" ");
-        if (parts.length == 3 && "DUMP SEWAGE".equalsIgnoreCase(parts[0] + " " + parts[1])) {
-            handleSewageDump(parts[2], writer);
+
+        if (parts.length == 2 && "REGISTER".equalsIgnoreCase(parts[0])) {
+            // todo
+        } else if (parts.length == 2 && "ORDER".equalsIgnoreCase(parts[0])) {
+            // todo
         } else {
             writer.println("Unknown request");
             logMessage("Sent: Unknown request");
-        }
-    }
-
-    private void handleSewageDump(String dumpedSewage, PrintWriter writer) {
-        try {
-            String response = "DUMPED SEWAGE " + dumpedSewage;
-            writer.println(response);
-            logMessage("Sent: " + response);
-            accumulatedSewage += Integer.parseInt(dumpedSewage);
-            sewageLabel.setText("Accumulated sewage: " + accumulatedSewage);
-        } catch (NumberFormatException e) {
-            writer.println("Invalid request format");
-            logMessage("Sent: Invalid request format");
         }
     }
 }
