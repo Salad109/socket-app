@@ -70,7 +70,8 @@ public class SewagePlant {
     }
 
     private void handleBillRequest(PrintWriter writer) {
-        String response = "BILL " + accumulatedSewage;
+        int bill = accumulatedSewage * 100;
+        String response = "BILL " + bill;
         writer.println(response);
         logMessage("Sent: " + response);
         accumulatedSewage = 0;

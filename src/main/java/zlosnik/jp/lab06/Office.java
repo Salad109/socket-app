@@ -35,7 +35,7 @@ public class Office {
         sewagePlantHostnameField = new JTextField("localhost", 10);
         sewagePlantPortField = new JTextField("12345", 10);
 
-        JButton sendRequestButton = new JButton("Send Request");
+        JButton sendRequestButton = new JButton("Send Bill Request");
         sendRequestButton.addActionListener(e -> sendRequestToSewagePlant());
 
         JPanel inputPanel = new JPanel(new GridLayout(0, 2));

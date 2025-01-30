@@ -2,7 +2,12 @@ package zlosnik.jp.lab06;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class House {
@@ -12,6 +17,11 @@ public class House {
     private JLabel sewageCounterLabel;
     private JLabel portLabel;
     private JTextArea textArea;
+    private JTextField officeHostnameField;
+    private JTextField officePortField;
+
+    private String officeHostname = "localhost";
+    private int officePort = 12345;
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(House::new);
@@ -33,12 +43,26 @@ public class House {
         textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
 
+        officeHostnameField = new JTextField(officeHostname, 10);
+        officePortField = new JTextField(String.valueOf(officePort), 10);
+        JButton sendRequestButton = new JButton("Send Request to Office");
+        sendRequestButton.addActionListener(e -> sendRequestToOffice());
+
+        JPanel inputPanel = new JPanel(new GridLayout(0, 2));
+        inputPanel.add(new JLabel("Office hostname:"));
+        inputPanel.add(officeHostnameField);
+        inputPanel.add(new JLabel("Office port:"));
+        inputPanel.add(officePortField);
+        inputPanel.add(new JLabel());
+        inputPanel.add(sendRequestButton);
+
         frame.setLayout(new BorderLayout());
         frame.add(portLabel, BorderLayout.NORTH);
         frame.add(scrollPane, BorderLayout.CENTER);
         frame.add(sewageCounterLabel, BorderLayout.SOUTH);
+        frame.add(inputPanel, BorderLayout.NORTH);
 
-        frame.setSize(400, 300);
+        frame.setSize(600, 400);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.setAlwaysOnTop(true);
         frame.setVisible(true);
@@ -97,6 +121,28 @@ public class House {
         } catch (NumberFormatException e) {
             writer.println("Invalid request format");
             logMessage("Sent: Invalid request format");
+        }
+    }
+
+    private void sendRequestToOffice() {
+        officeHostname = officeHostnameField.getText();
+        officePort = Integer.parseInt(officePortField.getText());
+
+        try (Socket socket = new Socket(officeHostname, officePort);
+             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+            String request = "REQUEST SERVICE";
+            writer.println(request);
+            logMessage("Sent: " + request);
+
+            String response = reader.readLine();
+            logMessage("Received: " + response);
+
+        } catch (UnknownHostException ex) {
+            logMessage("Unknown host: " + ex.getMessage());
+        } catch (IOException ex) {
+            logMessage("I/O error: " + ex.getMessage());
         }
     }
 }
