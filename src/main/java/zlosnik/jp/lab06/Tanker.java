@@ -10,7 +10,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class Tanker {
-
     private static final int TOTAL_CAPACITY = 20;
 
     private String houseHostname = "localhost";

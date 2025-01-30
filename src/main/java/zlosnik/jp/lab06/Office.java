@@ -71,8 +71,14 @@ public class Office {
 
         if (parts.length == 2 && "REGISTER TANKER".equals(parts[0])) {
             // todo
-        } else if (parts.length == 2 && "ORDER SERVICE".equals(parts[0])) {
-            // todo
+        } else if (parts.length == 2 && "REQUEST SERVICE".equals(request)) {
+            if (true) { // todo
+                writer.println("REQUEST ACCEPTED");
+                logMessage("Sent: REQUEST ACCEPTED");
+            } else {
+                writer.println("REQUEST DENIED");
+                logMessage("Sent: REQUEST DENIED");
+            }
         } else {
             writer.println("Unknown request");
             logMessage("Sent: Unknown request");
