@@ -73,7 +73,7 @@ public class House {
 
     private void processRequest(String request, PrintWriter writer) {
         String[] parts = request.split(" ");
-        if (parts.length == 3 && "DRAIN SEWAGE".equalsIgnoreCase(parts[0] + " " + parts[1])) {
+        if (parts.length == 3 && "DRAIN SEWAGE".equals(parts[0] + " " + parts[1])) {
             handleSewageRequest(parts[2], writer);
         } else {
             writer.println("Unknown request");

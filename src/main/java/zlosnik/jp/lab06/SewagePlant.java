@@ -44,15 +44,12 @@ public class SewagePlant {
         SwingUtilities.invokeLater(() -> textArea.append(message + "\n"));
     }
 
-    private void logError(String message, Exception e) {
-        SwingUtilities.invokeLater(() -> textArea.append(message + ": " + e.getMessage() + "\n"));
-        e.printStackTrace();
-    }
-
     private void processRequest(String request, PrintWriter writer) {
         String[] parts = request.split(" ");
-        if (parts.length == 3 && "DUMP SEWAGE".equalsIgnoreCase(parts[0] + " " + parts[1])) {
+        if (parts.length == 3 && "DUMP SEWAGE".equals(parts[0] + " " + parts[1])) {
             handleSewageDump(parts[2], writer);
+        } else if ("REQUEST BILL".equals(parts[0] + " " + parts[1])) {
+            handleBillRequest(writer);
         } else {
             writer.println("Unknown request");
             logMessage("Sent: Unknown request");
@@ -70,5 +67,13 @@ public class SewagePlant {
             writer.println("Invalid request format");
             logMessage("Sent: Invalid request format");
         }
+    }
+
+    private void handleBillRequest(PrintWriter writer) {
+        String response = "BILL " + accumulatedSewage;
+        writer.println(response);
+        logMessage("Sent: " + response);
+        accumulatedSewage = 0;
+        sewageLabel.setText("Accumulated sewage: 0");
     }
 }

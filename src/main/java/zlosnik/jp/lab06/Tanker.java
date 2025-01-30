@@ -16,7 +16,7 @@ public class Tanker {
     private String houseHostname = "localhost";
     private int housePort = 12345;
     private String sewagePlantHostname = "localhost";
-    private int sewagePlantPort = 54321;
+    private int sewagePlantPort = 12345;
     private int currentSewageAmount = 0;
 
     private Socket socket;
@@ -148,7 +148,7 @@ public class Tanker {
 
         logMessage("Received: " + response);
         String[] parts = response.split(" ");
-        if (parts.length == 3 && "DRAINED SEWAGE".equalsIgnoreCase(parts[0] + " " + parts[1])) {
+        if (parts.length == 3 && "DRAINED SEWAGE".equals(parts[0] + " " + parts[1])) {
             try {
                 int receivedSewage = Integer.parseInt(parts[2]);
                 currentSewageAmount += receivedSewage;
@@ -156,7 +156,7 @@ public class Tanker {
             } catch (NumberFormatException ex) {
                 logMessage("Invalid sewage amount in response: " + parts[2]);
             }
-        } else if (parts.length == 3 && "DUMPED SEWAGE".equalsIgnoreCase(parts[0] + " " + parts[1])) {
+        } else if (parts.length == 3 && "DUMPED SEWAGE".equals(parts[0] + " " + parts[1])) {
             try {
                 int dumpedSewage = Integer.parseInt(parts[2]);
                 currentSewageAmount -= dumpedSewage;
