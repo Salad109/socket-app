@@ -56,11 +56,14 @@ public class House {
         inputPanel.add(new JLabel());
         inputPanel.add(sendRequestButton);
 
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        bottomPanel.add(portLabel);
+        bottomPanel.add(sewageCounterLabel);
+
         frame.setLayout(new BorderLayout());
-        frame.add(portLabel, BorderLayout.NORTH);
-        frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(sewageCounterLabel, BorderLayout.SOUTH);
         frame.add(inputPanel, BorderLayout.NORTH);
+        frame.add(scrollPane, BorderLayout.CENTER);
+        frame.add(bottomPanel, BorderLayout.SOUTH);
 
         frame.setSize(600, 400);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

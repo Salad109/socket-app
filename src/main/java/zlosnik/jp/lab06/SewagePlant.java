@@ -29,10 +29,13 @@ public class SewagePlant {
         JScrollPane scrollPane = new JScrollPane(textArea);
         sewageLabel = new JLabel("Accumulated sewage: 0");
 
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        bottomPanel.add(portLabel);
+        bottomPanel.add(sewageLabel);
+
         frame.setLayout(new BorderLayout());
-        frame.add(portLabel, BorderLayout.NORTH);
         frame.add(scrollPane, BorderLayout.CENTER);
-        frame.add(sewageLabel, BorderLayout.SOUTH);
+        frame.add(bottomPanel, BorderLayout.SOUTH);
 
         frame.setSize(400, 300);
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
