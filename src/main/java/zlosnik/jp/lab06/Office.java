@@ -15,7 +15,7 @@ public class Office {
     private JTextField sewagePlantPortField;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(Office::new);
+        new Office();
     }
 
     public Office() {
@@ -69,7 +69,7 @@ public class Office {
     private void processRequest(String request, PrintWriter writer) {
         String[] parts = request.split(" ");
 
-        if (parts.length == 2 && "REGISTER TANKER".equals(parts[0])) {
+        if (parts.length == 2 && "REGISTER TANKER".equals(request)) {
             // todo
         } else if (parts.length == 2 && "REQUEST SERVICE".equals(request)) {
             if (true) { // todo

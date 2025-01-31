@@ -24,14 +24,14 @@ public class House {
     private int officePort = 12345;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(House::new);
+        new House();
     }
 
     public House() {
         createAndShowGUI();
         startSewageIncrementer();
-        Server server = new Server(textArea, portLabel, this::processRequest);
-        server.startServerInBackground();
+        new Server(textArea, portLabel, this::processRequest).startServerInBackground();
+
     }
 
     private void createAndShowGUI() {

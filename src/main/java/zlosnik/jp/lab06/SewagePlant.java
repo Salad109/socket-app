@@ -11,7 +11,7 @@ public class SewagePlant {
     private int accumulatedSewage = 0;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(SewagePlant::new);
+        new SewagePlant();
     }
 
     public SewagePlant() {

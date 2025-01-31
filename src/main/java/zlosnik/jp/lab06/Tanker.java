@@ -30,7 +30,7 @@ public class Tanker {
     private JTextField sewagePlantPortField;
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(Tanker::new);
+        new Tanker();
     }
 
     public Tanker() {
